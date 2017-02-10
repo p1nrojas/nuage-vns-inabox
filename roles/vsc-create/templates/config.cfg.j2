@@ -1,0 +1,184 @@
+# TiMOS-DC-C-4.0.6-113 cpm/i386 NUAGE VSC Copyright (c) 2000-2016 Nokia.
+# All rights reserved. All use subject to applicable license agreements.
+# Built on Wed Dec 21 16:45:57 PST 2016 [64ba4c] by builder in /rel4.0-DC/release/panos/main
+
+# Generated WED FEB 01 23:38:48 2017 UTC
+
+exit all
+configure
+#--------------------------------------------------
+echo "System Configuration"
+#--------------------------------------------------
+    system
+        name "{{ inventory_hostname }}"
+        snmp
+            shutdown
+        exit
+        time
+            ntp
+{% for server in ntp_server %}
+                server {{ server }}
+{% endfor %}
+                no shutdown
+            exit
+            sntp
+                shutdown
+            exit
+            zone UTC 
+        exit
+        thresholds
+            rmon
+            exit
+        exit
+    exit
+#--------------------------------------------------
+echo "System Security Configuration"
+#--------------------------------------------------
+    system
+    exit
+#--------------------------------------------------
+echo "Log Configuration"
+#--------------------------------------------------
+    log 
+    exit 
+#--------------------------------------------------
+echo "System Security Cpm Hw Filters and PKI Configuration"
+#--------------------------------------------------
+    system
+        security
+        exit
+    exit
+#--------------------------------------------------
+echo "QoS Policy Configuration"
+#--------------------------------------------------
+    qos
+    exit
+#--------------------------------------------------
+echo "Card Configuration"
+#--------------------------------------------------
+#--------------------------------------------------
+echo "Service Configuration"
+#--------------------------------------------------
+    service
+    exit
+#--------------------------------------------------
+echo "LAG Configuration"
+#--------------------------------------------------
+    lag 98
+        description "Multichassis interconnect LAG"
+        encap-type dot1q
+        qos
+        exit
+        lacp active administrative-key 36864 
+        no shutdown
+    exit
+#--------------------------------------------------
+echo "Virtual Switch Controller Configuration"
+#--------------------------------------------------
+    vswitch-controller
+        xmpp-server "{{ xmpp.username }}@{{ vsd_fqdn }}"
+        open-flow
+        exit
+        xmpp
+        exit
+        ovsdb
+        exit
+    exit
+#--------------------------------------------------
+echo "Management Router Configuration"
+#--------------------------------------------------
+    router management
+    exit
+
+#--------------------------------------------------
+echo "Router (Network Side) Configuration"
+#--------------------------------------------------
+    router 
+        interface "control"
+{% for interface in interfaces %}
+{% if interface.name == "control" %}
+            address {{ interface.ip }}/{{ interface.prefix }}
+            no shutdown
+{% endif %}
+{% endfor %}
+        exit
+        interface "system"
+{% if system_ip is defined %}
+            address {{ system_ip }}/32
+            no shutdown
+{% endif %}
+        exit
+        vxlan
+        exit
+{% if as_number is defined %}
+        autonomous-system {{ as_number }}
+{% else %}
+        autonomous-system 6500
+{% endif %}
+{% if system_ip is defined %}
+        router-id {{ system_ip }}
+{% endif %}
+#--------------------------------------------------
+echo "Static Route Configuration"
+#--------------------------------------------------
+{% for vsc_item in list_of_vsc %}
+{% if vsc_item != inventory_hostname %}
+{% if hostvars[vsc_item].system_ip != system_ip %}
+        static-route {{ hostvars[vsc_item].system_ip }}/32 next-hop {% for interface in hostvars[vsc_item].interfaces %}{% if interface.name == "control" %}{{ interface.ip }}{% endif %}{% endfor %}
+
+{% endif %}
+{% endif %}
+{% endfor %}
+#--------------------------------------------------
+echo "Web Portal Protocol Configuration"
+#--------------------------------------------------
+    exit
+
+#--------------------------------------------------
+echo "Service Configuration"
+#--------------------------------------------------
+    service
+        customer 1 create
+            description "Default customer"
+        exit
+    exit
+#--------------------------------------------------
+echo "Router (Service Side) Configuration"
+#--------------------------------------------------
+    router 
+#--------------------------------------------------
+echo "BGP Configuration"
+#--------------------------------------------------
+        bgp
+            enable-peer-tracking
+            rapid-withdrawal
+            rapid-update evpn
+            group "vscs"
+                family evpn
+                type internal
+{% for vsc_item in list_of_vsc %}
+{% if vsc_item != inventory_hostname %}
+{% if hostvars[vsc_item].system_ip != system_ip %}
+                neighbor {{ hostvars[vsc_item].system_ip }}
+{% endif %}
+{% endif %}
+{% endfor %}
+                exit
+            exit
+            no shutdown
+        exit
+    exit
+
+#--------------------------------------------------
+echo "System Time NTP Configuration"
+#--------------------------------------------------
+    system
+        time
+            ntp
+            exit
+        exit
+    exit
+
+exit all
+
+# Finished WED FEB 01 23:38:48 2017 UTC

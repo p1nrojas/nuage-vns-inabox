@@ -1,0 +1,108 @@
+---
+# Remove dummies interfaces and bridges for libvirt
+
+- name: Are you sure?
+  pause: prompt='This operation will reboot your server and remove bridges/interfaces! Press return to continue. Press Ctrl+c and then "a" to abort'
+
+- name: Pull facts on hypervisor
+  action: setup
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: Checking if this server is a RedHat Host
+  fail:
+    msg: |
+      This role just work with RedHat releases
+      Don't try again please!
+  when:
+    - ansible_os_family != "RedHat"
+  delegate_to: "{{ hypervisor }}"
+
+
+- name: Check if "NetworkManager" service is running
+  command: systemctl status NetworkManager
+  ignore_errors: yes
+  changed_when: true
+  register: service_nm_status
+  delegate_to: "{{ hypervisor }}"
+
+- name: Report status of "NetworkManager" services
+  fail:
+    msg: |
+      Service NetworkManager is running.
+      Output of `systemctl status NetworkManager`:
+      {{ service_network_status.stdout }}
+      {{ service_network_status.stderr }}
+  delegate_to: "{{ hypervisor }}"
+  when: service_nm_status | succeeded 
+
+
+- name: check if bridges have length over 0
+  fail: msg="No bridges have been defined"
+  delegate_to: "{{ hypervisor }}"
+  when: 
+    - bridges|length == 0
+    - bridges is undefined
+    - hypervisor is defined
+
+- name: "Execute command modprobe -r dummy"
+  command: "modprobe -r dummy"
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: "Remove /etc/modules-load.d/dummy.conf"
+  file:
+    path: "/etc/modules-load.d/dummy.conf"
+    state: absent
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: "Remove /etc/modprobe.d/dummy.conf"
+  file:
+    path: "/etc/modprobe.d/dummy.conf"
+    state: absent
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: "Removing network scripts for dummies- ifcfg files"
+  file: 
+    path: "/etc/sysconfig/network-scripts/ifcfg-{{ item.dummy_if }}"
+    state: absent
+  delegate_to: "{{ hypervisor }}"
+  with_items: "{{ bridges }}"
+  when: hypervisor is defined
+
+- name: "Removing network scripts for bridges- ifcfg files"
+  file: 
+    path: "/etc/sysconfig/network-scripts/ifcfg-{{ item.name }}"
+    state: absent
+  delegate_to: "{{ hypervisor }}"
+  with_items: "{{ bridges }}"
+  when: hypervisor is defined
+
+- name: "Reboot server"
+  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  async: 1
+  poll: 0
+  ignore_errors: true
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: "Waiting until 5min for server to come back"
+  local_action: wait_for host={{ hypervisor }} port=22 delay=30 timeout=300
+
+- name: Check if there are dummy interfaces
+  shell: ip addr | grep dummy | grep -v grep
+  ignore_errors: yes
+  changed_when: false
+  register: dummy_status
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: Report status of Dummy/Bridges
+  fail:
+    msg: |
+      Dummy interface is still up.
+      Return code from `grep`:
+      {{ dummy_status.stdout}}
+  when: dummy_status.stdout_lines == 0

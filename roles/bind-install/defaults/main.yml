@@ -1,0 +1,52 @@
+# roles/bind/defaults/main.yml
+---
+bind_dir: "/var/cache/bind"
+
+bind_log: "data/named.run"
+
+bind_zone_name: "example.com"
+bind_zone_networks:
+  - "10.0.2"
+
+# List of servers to be notified when the master zone is reloaded.
+bind_zone_also_notify: []
+
+# List of acls.
+bind_acls: []
+
+# List of IPv4 address of the network interface(s) to listen on. Set to "any"
+# to listen on all interfaces
+bind_listen_ipv4:
+  - "127.0.0.1"
+
+# List of IPv6 address of the network interface(s) to listen on.
+bind_listen_ipv6:
+  - "::1"
+
+# List of hosts that are allowed to query this DNS server.
+bind_allow_query:
+  - "localhost"
+
+# Determines whether recursion should be allowed. Typically, an authoritative
+# name server (= the target use case of this role) should have recursion turned
+# OFF.
+bind_recursion: false
+
+# DNS round robin order (random or cyclic)
+bind_rrset_order: "random"
+
+# SOA information
+bind_zone_hostmaster_email: "hostmaster"
+bind_zone_ttl: "1W"
+bind_zone_time_to_refresh: "1D"
+bind_zone_time_to_retry: "1H"
+bind_zone_time_to_expire: "1W"
+bind_zone_minimum_ttl: "1D"
+
+# Zone Resource Records
+bind_other_name_servers: []
+bind_zone_hosts: []
+bind_zone_mail_servers: []
+bind_zone_name_servers: []
+bind_zone_services: []
+bind_zone_text: []

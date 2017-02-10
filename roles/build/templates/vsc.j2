@@ -1,0 +1,55 @@
+# *** WARNING ***
+# This is a generated file. Manual changes to this file
+# will be lost if reset-build or build is run
+#
+# Server name: {{ item.hostname }}
+# Description: {{ item.description }}
+
+image_qcow2: {{ item.image_qcow2 }}
+hypervisor: {{ item.hypervisor }}
+{% if item is defined %}
+gateway: {{ item.gateway }}
+interfaces:
+{% for interfaces in item.interfaces %}
+  - { name: {{ interfaces.name }} ,
+      bridge: {{ interfaces.bridge }} ,
+      ip: {{ interfaces.ip }} ,
+      prefix: {{ interfaces.prefix }} }
+{% endfor %}
+static_route_list: 
+{% for route in item.static_routes %}
+  - {{ route }}
+{% endfor %} 
+{% endif %}
+{% if item.ntpservers is defined %}
+{% if item.ntpservers == "local" %}
+ntp_server: "local"
+{% else %}
+ntp_server:
+{% for server in item.ntpservers %}
+  - {{ server }}
+{% endfor %}
+{% endif %}
+{% else %}
+ntp_server:
+{% for server in ntp_server_list %}
+  - {{ server }}
+{% endfor %}
+{% endif %}
+{% if item.nameservers is defined %}
+dns:
+  servers:
+{% for server in item.nameservers %}
+    - {{ server }}
+{% endfor %}
+{% else %}
+dns:
+  servers:
+{% for server in dns_server_list %}
+    - {{ server }}
+{% endfor %}
+{% endif %}
+xmpp:
+  username: {{ item.xmpp_username }}
+system_ip: {{ item.system_ip }}
+vsd_fqdn: {{ item.vsd_fqdn }}

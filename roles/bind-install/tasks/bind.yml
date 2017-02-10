@@ -1,0 +1,38 @@
+# Set up a BIND demo server
+
+- name: Master | Main BIND config file (master)
+  template:
+    src: etc_named.conf.j2
+    dest: "/etc/named.conf"
+    owner: "{{ named_owner }}"
+    group: "{{ named_group }}"
+    mode: '0640'
+    setype: named_conf_t
+    validate: 'named-checkconf %s'
+  notify: restart bind
+  tags: bind
+
+- name: Master | Create forward lookup zone file
+  template:
+    src: bind_zone.j2
+    dest: "/etc/named/zones/db.{{ bind_zone_name }}"
+    owner: "{{ named_owner }}"
+    group: "{{ named_group }}"
+    mode: "0640"
+    setype: named_zone_t
+    validate: 'named-checkzone -d {{ bind_zone_name }} %s'
+  notify: restart bind
+  tags: bind
+
+- name: Master | Create reverse lookup zone file
+  template:
+    src: reverse_zone.j2
+    dest: "/etc/named/zones/db.{{ item|reverse_lookup_zone }}"
+    owner: "{{ named_owner }}"
+    group: "{{ named_group }}"
+    mode: "0640"
+    setype: named_zone_t
+    validate: "named-checkzone {{ item|reverse_lookup_zone }} %s"
+  with_items: "{{ bind_zone_networks }}"
+  notify: restart bind
+  tags: bind

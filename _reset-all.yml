@@ -1,0 +1,9 @@
+---
+- hosts:
+    - vsd
+    - nserver
+    - vsc
+  remote_user: root
+  gather_facts: no
+  roles:
+    - dom-reset

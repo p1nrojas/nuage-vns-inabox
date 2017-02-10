@@ -1,0 +1,37 @@
+---
+- name: Are you sure?
+  pause: prompt='This operation will destroy all domains and files! Press return to continue. Press Ctrl+c and then "a" to abort'
+
+- name: List the Virtual Machine
+  virt: command=list_vms
+  register: virt_vms
+  delegate_to: "{{ hypervisor }}"
+  when:
+    - hypervisor is defined
+
+- name: Destroy virtual domains in libvirt
+  virt:
+    name: "{{ inventory_hostname }}" 
+    state: destroyed
+  delegate_to: "{{ hypervisor }}"
+  when: 
+    - hypervisor is defined
+    - inventory_hostname in virt_vms.list_vms
+
+- name: Undefine virtual domains in libvirt
+  virt:
+    name: "{{ inventory_hostname }}" 
+    command: undefine
+  delegate_to: "{{ hypervisor }}"
+  when: 
+    - hypervisor is defined
+    - inventory_hostname in virt_vms.list_vms 
+
+- name: Destroy VM files
+  file: 
+    path: "{{ images_path }}{{ inventory_hostname }}/{{ inventory_hostname }}.qcow2"
+    state: absent
+  delegate_to: "{{ hypervisor }}"
+  when: 
+    - images_path is defined 
+    - hypervisor is defined

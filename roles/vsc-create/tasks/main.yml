@@ -1,0 +1,18 @@
+---
+
+# Prepare KVM and Check Images
+- include: prep_hypervisor_and_vms.yml
+  when: hypervisor is defined
+
+# Copy qcow2 image to target host
+- include: copy_qcow.yml
+  when: hypervisor is defined
+
+# Configure VSC Network Settings
+- include: configure_vsc_network.yml
+  when: hypervisor is defined
+
+# Define and create guest VMs
+- include: define_and_create_vm.yml
+  when: hypervisor is defined
+

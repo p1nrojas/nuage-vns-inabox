@@ -1,0 +1,46 @@
+# Copy qcow2 image to target host
+- name: Checking in QCOW2 base image file is was already copied before trying resizing
+  stat:
+    path: "{{ image_qcow2 }}"
+  register: qcow2_resize
+  delegate_to: "{{ hypervisor }}"
+  when:
+    - hypervisor is defined
+
+- name: "copy image to hypervisor from local path: {{ image_qcow2 }} to remote path: {{ image_qcow2 }}"
+  copy:
+    src: "{{ image_qcow2 }}"
+    dest: "{{ image_qcow2 }}"
+    owner: "{{ libvirt.user }}"
+    group: "{{ libvirt.group }}"
+    mode: 0666
+  delegate_to: "{{ hypervisor }}"
+  when:
+    - hypervisor is defined
+    - qcow2_resize.stat.exists == False
+
+- name: Checking in VM image file is was already copied before
+  stat:
+    path: "{{ images_path }}{{ inventory_hostname }}/{{ inventory_hostname }}.qcow2"
+  register: qcow2_file
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: Creates VM directory
+  file: path={{ images_path }}{{ inventory_hostname }} state=directory owner={{ libvirt.user }} group={{ libvirt.group }}
+  delegate_to: "{{ hypervisor }}"
+  when:
+    - hypervisor is defined
+    - qcow2_file.stat.exists == False
+
+- name: "Remote copy file to image server folder from remote_path: {{ image_qcow2 }} to remote_path: {{ images_path }} "
+  copy:
+    remote_src: true
+    src: "{{ image_qcow2 }}"
+    dest: "{{ images_path }}{{ inventory_hostname }}/{{ inventory_hostname }}.qcow2"
+    owner: "{{ libvirt.user }}"
+    group: "{{ libvirt.group }}"
+  delegate_to: "{{ hypervisor }}"
+  when:
+    - hypervisor is defined
+    - qcow2_file.stat.exists == False

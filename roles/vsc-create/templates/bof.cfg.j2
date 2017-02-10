@@ -1,0 +1,22 @@
+# TiMOS-DC-C-4.0.5-60 cpm/i386 NUAGE VSC Copyright (c) 2000-2016 Nokia.
+# All rights reserved. All use subject to applicable license agreements.
+# Built on Mon Oct 10 00:49:21 PDT 2016 [5f9ab7] by builder in /rel4.0-DC/b1/5/panos/main
+# Created by ansible
+# Generated FRI NOV 11 02:10:01 2016 UTC
+
+primary-image         cf1:\timos\cpm.tim
+primary-config        cf1:\config.cfg
+address               {% for interface in interfaces %}{% if interface.name == "bof" %}{{ interface.ip }}/{{ interface.prefix }}{% endif %}{% endfor %} active
+primary-dns           {{ dns.servers[0] }}
+dns-domain            {{ domain }}
+{% for static_route in static_route_list %}
+static-route          {{ static_route }}
+{% endfor %}
+autonegotiate
+duplex                full
+speed                 100
+wait                  3
+persist               off
+li-local-save
+li-separate
+console-speed         115200

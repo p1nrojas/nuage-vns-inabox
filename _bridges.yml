@@ -1,0 +1,29 @@
+---
+# purpose: Create dummies interfaces abd bridges.
+# CAUTION: WIll reboot the KVM server
+# CAUTION: It would change your selinux, forwarding and iptables seetings
+# CAUTION: Will disable NetworkManager and firewall
+# Author: Mauricio Rojas / pinrojas.com
+ 
+- hosts: localhost
+  gather_facts: no
+  remote_user: root
+  roles:
+    - _bridges
+#    - _bridges-reset
+  vars:
+    hypervisor: 192.168.1.113
+    public_if: enp0s20f1
+    bridges:
+      - { name: br00,
+          dummy_if: dummy0 ,
+          macaddr: "52:54:00:7e:27:d0" ,
+          dummy_ip: 10.10.10.1 ,
+          netmask: 255.255.255.0
+        }
+      - { name: br01,
+          dummy_if: dummy1 ,
+          macaddr: "52:54:00:7e:27:d1" ,
+          dummy_ip: 10.10.20.1 ,
+          netmask: 255.255.255.0
+        }

@@ -1,0 +1,111 @@
+exit all
+configure
+
+#--------------------------------------------------
+echo "System Configuration"
+#--------------------------------------------------
+    system
+        name {{ inventory_hostname }}
+        time
+            ntp
+            {% for server in ntp_server %}
+                server {{ server }}
+            {% endfor %}
+                no shutdown
+            exit
+        exit
+    exit
+#--------------------------------------------------
+echo "Virtual Switch Controller Configuration"
+#--------------------------------------------------
+    vswitch-controller
+        xmpp-server "{{ xmpp.username }}@{{ vsd_fqdn }}"
+    exit
+
+#--------------------------------------------------
+echo "Router (Network Side) Configuration"
+#--------------------------------------------------
+    router
+        interface "control"
+            address {% for interface in interfaces %}{% if interface.name == "control" %}{{ interface.ip }}/{{ interface.prefix }}{% endif %}{% endfor %}
+            
+            no shutdown
+        exit
+        interface "system"
+        {% if system_ip is defined %}
+            address {{ system_ip }}/32
+            no shutdown
+        {% endif %}
+        exit
+        {% if as_number is defined %}
+        autonomous-system {{ as_number }}
+        {% else %}
+        autonomous-system 6500
+        {% endif %}
+        {% if system_ip is defined %}
+        router-id {{ system_ip }}
+        {% endif %}
+
+#--------------------------------------------------
+echo "Static Route Configuration"
+#--------------------------------------------------
+{% for vsc_item in list_of_vsc %}
+{% if vsc_item != inventory_hostname %}
+{% if hostvars[vsc_item].system_ip != system_ip %}
+        static-route {{ hostvars[vsc_item].system_ip }}/32 next-hop {% for interface in hostvars[vsc_item].interfaces %}{% if interface.name == "control" %}{{ interface.ip }}/{{ interface.prefix }}{% endif %}{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %} 
+
+#--------------------------------------------------
+echo "Web Portal Protocol Configuration"
+#--------------------------------------------------
+    exit
+
+#--------------------------------------------------
+echo "Service Configuration"          
+#--------------------------------------------------
+    service
+        customer 1 create
+            description "Default customer"
+        exit
+    exit
+#--------------------------------------------------
+echo "Router (Service Side) Configuration"
+#--------------------------------------------------
+    router 
+#--------------------------------------------------
+echo "BGP Configuration"
+#--------------------------------------------------
+        bgp
+            enable-peer-tracking
+            rapid-withdrawal
+            rapid-update evpn
+            group "vscs"
+                family evpn
+                type internal
+{% for vsc_item in list_of_vsc %}
+{% if vsc_item != inventory_hostname %}
+{% if hostvars[vsc_item].system_ip != system_ip %}
+                neighbor {{ hostvars[vsc_item].system_ip }}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+                exit
+            exit
+            no shutdown
+        exit
+    exit
+
+#--------------------------------------------------
+echo "System Time NTP Configuration"
+#--------------------------------------------------
+    system
+        time
+            ntp
+            exit
+        exit
+    exit
+
+exit all

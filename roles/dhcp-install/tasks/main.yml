@@ -1,0 +1,11 @@
+---
+# tasks file for dhcpd-install
+
+- name: install dhcp
+  yum: name=dhcp state=present
+
+- name: Copy dhcpd.conf file to nserver
+  template: src=dhcpd.conf.j2 backup=no dest=/etc/dhcp/dhcpd.conf
+
+- name: start and enable dhcpd
+  service: name=dhcpd state=started enabled=yes

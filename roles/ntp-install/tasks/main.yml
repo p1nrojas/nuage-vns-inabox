@@ -1,0 +1,11 @@
+---
+# tasks file for ntp-install
+
+- name: install ntp
+  yum: name=ntp state=present
+
+- name: Copy ntp.conf file to nserver
+  template: src=ntp.conf.j2 backup=no dest=/etc/ntp.conf
+
+- name: start and enable ntpd
+  service: name=ntpd state=started enabled=yes

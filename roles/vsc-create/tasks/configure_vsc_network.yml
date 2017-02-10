@@ -1,0 +1,16 @@
+
+- name: Copying bof.cfg template
+  template: src={{ item }}.j2 backup=no dest="/tmp/{{ inventory_hostname }}-{{ item }}"
+  delegate_to: "{{ hypervisor }}"
+  with_items:
+    - bof.cfg
+    - config.cfg
+  when: hypervisor is defined
+
+- name: Executing guestfish to configure VSC ( Controller ) network settings
+  command: "guestfish --rw -a {{ images_path }}{{ inventory_hostname }}/{{ inventory_hostname }}.qcow2  -m /dev/sda1 upload /tmp/{{ inventory_hostname }}-{{ item }} /{{ item }}"
+  delegate_to: "{{ hypervisor }}"
+  with_items:
+    - bof.cfg
+    - config.cfg
+  when: hypervisor is defined

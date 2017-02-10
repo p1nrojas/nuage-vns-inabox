@@ -1,0 +1,17 @@
+---
+- name: Create host_vars files for servers
+  template: src=servers.j2 backup=no dest={{ playbook_dir }}/host_vars/{{ item.hostname }}
+  with_items: "{{ servers }}"
+
+- name: Create host_vars files for VSC's 
+  template: src=vsc.j2 backup=no dest={{ playbook_dir }}/host_vars/{{ item.hostname }}
+  with_items: "{{ vsc_controllers }}"
+
+- name: Creating bash files easy_way.sh to run all playbooks at once
+  template: src=easy_way.sh.j2 backup=no dest={{ playbook_dir }}/easy_way.sh
+
+- name: Chnage permissions to easy_way.sh
+  file:
+    path: "{{ playbook_dir }}/easy_way.sh"
+    mode: 0755
+

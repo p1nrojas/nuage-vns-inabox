@@ -1,0 +1,8 @@
+#Created by ansible
+DEVICE={{ item.dummy_if }}
+MACADDR={{ item.macaddr }}
+NM_CONTROLLED=no
+ONBOOT=yes
+TYPE=Ethernet
+BRIDGE={{ item.name }}
+IPV6INIT=no

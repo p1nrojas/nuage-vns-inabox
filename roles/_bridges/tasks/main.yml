@@ -1,0 +1,132 @@
+---
+# Create dummies interfaces and bridges for libvirt
+
+- name: Are you sure?
+  pause: prompt='This operation will REBOOT your server and add bridges/interfaces! Press return to continue. Press Ctrl+c and then "a" to abort'
+
+- name: Pull facts on hypervisor
+  action: setup
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: Disabling selinux
+  selinux:
+    state: disabled
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: Applying forwardig
+  command: "/sbin/sysctl -w net.ipv4.ip_forward=1"
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: Checking if this server is a RedHat Host
+  fail:
+    msg: |
+      This role just work with RedHat releases
+      Don't try again please!
+  when:
+    - ansible_os_family != "RedHat"
+  delegate_to: "{{ hypervisor }}"
+
+
+- name: Check if "NetworkManager" service is running
+  command: systemctl status NetworkManager
+  ignore_errors: yes
+  changed_when: true
+  register: service_nm_status
+  delegate_to: "{{ hypervisor }}"
+
+- name: Disabling "NetworkManager" and "firewall" services
+  command:
+  with_items: 
+    - "systemctl stop NetworkManager"
+    - "systemctl disable NetworkManager"
+    - "systemctl stop firewall"
+    - "systemctl disable firewall"
+  ignore_errors: yes
+  delegate_to: "{{ hypervisor }}"
+  when: service_nm_status | succeeded 
+
+
+- name: check if bridges have length over 0
+  fail: msg="No bridges have been defined"
+  delegate_to: "{{ hypervisor }}"
+  when: 
+    - bridges|length == 0
+    - bridges is undefined
+    - hypervisor is defined
+
+- name: "Check if /etc/modules-load.d/dummy.conf exists and have permissions"
+  stat:
+    path: "/etc/modules-load.d/dummy.conf"
+  register: st
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: "Copying /etc/modules-load.d/dummy.conf template"
+  template: src=modules-load.d_dummy.conf.j2 backup=no dest=/etc/modules-load.d/dummy.conf
+  delegate_to: "{{ hypervisor }}"
+  when: 
+    - hypervisor is defined
+    - st.stat.exists == False
+
+- name: Copying /etc/modprobe.d/dummy.conf template
+  template: src=modprobe.d_dummy.conf.j2 backup=no dest=/etc/modprobe.d/dummy.conf
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: "Execute command modprobe dummy numdummies={{ bridges|length }}"
+  command: "modprobe dummy numdummies={{ bridges|length }}"
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: "Copy network scripts - ifcfg files"
+  template: src=ifcfg-dummy.j2 backup=no dest=/etc/sysconfig/network-scripts/ifcfg-{{ item.dummy_if }}
+  delegate_to: "{{ hypervisor }}"
+  with_items: "{{ bridges }}"
+  when: hypervisor is defined
+
+- name: "Copy network scripts - ifcfg files"
+  template: src=ifcfg-bridge.j2 backup=no dest=/etc/sysconfig/network-scripts/ifcfg-{{ item.name }}
+  delegate_to: "{{ hypervisor }}"
+  with_items: "{{ bridges }}"
+  when: hypervisor is defined
+
+- name: "Reboot server"
+  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  async: 1
+  poll: 0
+  ignore_errors: true
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: "Waiting until 5min for server to come back"
+  local_action: wait_for host={{ hypervisor }} port=22 delay=30 timeout=300
+
+- name: Check if there are dummy interfaces
+  shell: ip addr | grep dummy | grep -v grep
+  ignore_errors: yes
+  changed_when: false
+  register: dummy_status
+  delegate_to: "{{ hypervisor }}"
+  when: hypervisor is defined
+
+- name: Report status of Apache
+  fail:
+    msg: |
+      Dummy interface is not running.
+      Return code from `grep`:
+      {{ dummy_status.stdout}}
+  when: dummy_status.stdout_lines == 0
+
+- name: "Applying: iptables -t nat -A POSTROUTING -o {{ public_if }} -j MASQUERADE"
+  command: "{{ item }}"
+  with_items:
+    - 'iptables -F'
+    - 'iptables -t nat -A POSTROUTING -o {{ public_if }} -j MASQUERADE'
+    - 'iptables-save'
+  ignore_errors: yes
+  delegate_to: "{{ hypervisor }}"
+  when: 
+    - hypervisor is defined

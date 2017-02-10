@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: Mauricio Rojas
+  description: Deploy a smal PoC on KVM of Nuage VSP including NTP/DNS Serveri and libvirt domains
+  license: MIT
+  min_ansible_version: 2.3
+  platforms:
+    - name: EL
+      versions:
+        - 7
+  galaxy_tags:
+    - networking
+    - sdn
+    - nuage
+dependencies: []
