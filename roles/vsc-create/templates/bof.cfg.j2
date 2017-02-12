@@ -6,12 +6,13 @@
 
 primary-image         cf1:\timos\cpm.tim
 primary-config        cf1:\config.cfg
-address               {% for interface in interfaces %}{% if interface.name == "bof" %}{{ interface.ip }}/{{ interface.prefix }}{% endif %}{% endfor %} active
+{% for interface in interfaces %}
+{% if interface.name == "bof" %}
+address               {{ interface.ip }}/{{ interface.prefix }} active
+{% endif %}
+{% endfor %}
 primary-dns           {{ dns.servers[0] }}
 dns-domain            {{ domain }}
-{% for static_route in static_route_list %}
-static-route          {{ static_route }}
-{% endfor %}
 autonegotiate
 duplex                full
 speed                 100

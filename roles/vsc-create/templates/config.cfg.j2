@@ -129,6 +129,10 @@ echo "Static Route Configuration"
 {% endif %}
 {% endif %}
 {% endfor %}
+{% for static_route in static_route_list %}
+        static-route {{ static_route }}
+{% endfor %}
+
 #--------------------------------------------------
 echo "Web Portal Protocol Configuration"
 #--------------------------------------------------
