@@ -30,3 +30,30 @@
 {% endif %}
 {% endfor %}
 {% endif %}
+
+{% if servers is defined %}
+[util]
+{% for server in servers %}
+{% if server.inventory == "util" %}
+{{ server.hostname }} ansible_host={{ server.ansible_host }} ansible_user=root
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if servers is defined %}
+[nsg]
+{% for server in servers %}
+{% if server.inventory == "nsg" %}
+{{ server.hostname }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if servers is defined %}
+[client]
+{% for server in servers %}
+{% if server.inventory == "client" %}
+{{ server.hostname }}
+{% endif %}
+{% endfor %}
+{% endif %}

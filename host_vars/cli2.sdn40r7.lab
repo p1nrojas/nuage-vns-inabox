@@ -1,0 +1,26 @@
+# *** WARNING ***
+# This is a generated file. Manual changes to this file
+# will be lost if reset-build or build is run
+#
+# Server name: cli2.sdn40r7.lab
+# Description: client at branch2
+
+image_qcow2: /tmp/centos7.qcow2
+hypervisor: 192.168.1.113
+memory_KiB: 2097152
+vcpu_num: 2
+
+
+
+
+
+interfaces:
+  - { name: eth0 ,
+      bridge: branch2 ,
+      
+       }
+ntp_server:
+  - 10.10.10.2
+dns:
+  servers:
+    - 10.10.10.2

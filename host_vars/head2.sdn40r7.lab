@@ -1,0 +1,34 @@
+# *** WARNING ***
+# This is a generated file. Manual changes to this file
+# will be lost if reset-build or build is run
+#
+# Server name: head2.sdn40r7.lab
+# Description: NSG-v Head End at Datacenter
+
+image_qcow2: /tmp/nsg40r7.qcow2
+hypervisor: 192.168.1.113
+memory_KiB: 2097152
+vcpu_num: 2
+
+
+No_cloud_init: True
+
+
+interfaces:
+  - { name: port1 ,
+      bridge: wan ,
+      
+       }
+  - { name: port2 ,
+      bridge: inet ,
+      
+       }
+  - { name: port3 ,
+      bridge: datacenter ,
+      
+       }
+ntp_server:
+  - 10.10.10.2
+dns:
+  servers:
+    - 10.10.10.2

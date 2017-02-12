@@ -15,15 +15,33 @@
     hypervisor: 192.168.1.113
     public_if: enp0s20f1
     bridges:
-      - { name: br00,
+      - { name: datacenter,
           dummy_if: dummy0 ,
           macaddr: "52:54:00:7e:27:d0" ,
           dummy_ip: 10.10.10.1 ,
           netmask: 255.255.255.0
         }
-      - { name: br01,
+      - { name: wan,
           dummy_if: dummy1 ,
           macaddr: "52:54:00:7e:27:d1" ,
-          dummy_ip: 10.10.20.1 ,
+          dummy_ip: 10.250.250.1 ,
+          netmask: 255.255.255.0
+        }
+      - { name: inet,
+          dummy_if: dummy2 ,
+          macaddr: "52:54:00:7e:27:d2" ,
+          dummy_ip: 80.80.80.1 ,
+          netmask: 255.255.255.0
+        }
+      - { name: branch1,
+          dummy_if: dummy3 ,
+          macaddr: "52:54:00:7e:27:d1" ,
+          dummy_ip: 172.16.10.100 ,
+          netmask: 255.255.255.0
+        }
+      - { name: branch2,
+          dummy_if: dummy4 ,
+          macaddr: "52:54:00:7e:27:d1" ,
+          dummy_ip: 172.16.20.100 ,
           netmask: 255.255.255.0
         }

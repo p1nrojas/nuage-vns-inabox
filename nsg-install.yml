@@ -1,0 +1,10 @@
+---
+
+- hosts: 
+    - util
+    - nsg
+  remote_user: root
+  gather_facts: no
+  roles:
+    - dom-create
+

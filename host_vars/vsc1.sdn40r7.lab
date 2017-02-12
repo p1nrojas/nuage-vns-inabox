@@ -1,0 +1,27 @@
+# *** WARNING ***
+# This is a generated file. Manual changes to this file
+# will be lost if reset-build or build is run
+#
+# Server name: vsc1.sdn40r7.lab
+# Description: Nuage VSC - SDN controller
+
+image_qcow2: /tmp/vsc40r7.qcow2
+hypervisor: 192.168.1.113
+gateway: 10.10.10.1
+interfaces:
+  - { name: control ,
+      bridge: datacenter ,
+      ip: 10.10.10.11 ,
+      prefix: 24 }
+static_route_list: 
+  - 0.0.0.0/0 next-hop 10.10.10.1
+ 
+ntp_server:
+  - 10.10.10.2
+dns:
+  servers:
+    - 10.10.10.2
+xmpp:
+  username: vsc01
+system_ip: 1.1.1.2
+vsd_fqdn: vsd1.sdn40r7.lab

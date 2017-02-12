@@ -10,16 +10,23 @@ hypervisor: {{ item.hypervisor }}
 memory_KiB: {{ item.memory }}
 vcpu_num: {{ item.vcpu_num }}
 {%if item.disk_GB is defined %}disk_GB: {{ item.disk_GB }}{% endif %}
+
 {%if item.Is_NM_enabled is defined %}Is_NM_enabled: {{ item.Is_NM_enabled }}{% endif %}
 
+{%if item.No_cloud_init is defined %}No_cloud_init: {{ item.No_cloud_init }}{% endif %}
+
+{%if item.Guestfish is defined %}Guestfish: {{ item.Guestfish }}{% endif %}
+
 {% if item is defined %}
-gateway: {{ item.gateway }}
+{%if item.gateway is defined %}gateway: {{ item.gateway }}{% endif %}
+
 interfaces:
 {% for interfaces in item.interfaces %}
   - { name: {{ interfaces.name }} ,
       bridge: {{ interfaces.bridge }} ,
-      ip: {{ interfaces.ip }} ,
-      netmask: {{ interfaces.netmask }} }
+      {%if interfaces.ip is defined %}ip: {{ interfaces.ip }} ,{% endif %}
+
+      {%if interfaces.netmask is defined %}netmask: {{ interfaces.netmask }}{% endif %} }
 {% endfor %}
 {% endif %}
 {% if item.ntpservers is defined %}
