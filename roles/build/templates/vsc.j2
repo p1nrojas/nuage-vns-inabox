@@ -11,10 +11,15 @@ hypervisor: {{ item.hypervisor }}
 gateway: {{ item.gateway }}
 interfaces:
 {% for interfaces in item.interfaces %}
+{% if interfaces.ip is defined %}
   - { name: {{ interfaces.name }} ,
       bridge: {{ interfaces.bridge }} ,
       ip: {{ interfaces.ip }} ,
       prefix: {{ interfaces.prefix }} }
+{% else %}
+  - { name: {{ interfaces.name }} ,
+      bridge: {{ interfaces.bridge }} }
+{% endif %}
 {% endfor %}
 static_route_list: 
 {% for route in item.static_routes %}

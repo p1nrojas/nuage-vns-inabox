@@ -1,0 +1,11 @@
+---
+
+# Prepare stat server
+- include: 0_stat_setup.yml
+
+# Installing and configuring stat server
+- include: 1_stat_install.yml
+
+# Checking services at stat server
+- include: 2_stats_vsd_settings.yml
+

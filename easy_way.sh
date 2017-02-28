@@ -48,4 +48,10 @@ ssh-keyscan -t rsa 10.10.10.10 | sed -e 's/#.*$//' | sed -e '/^$/d' >> ~/.ssh/kn
 echo "$(date) finishing installation of VSD"
 ansible-playbook -i hosts nuage-deploy.yml 
 
+# Installing util server
+ssh-keygen -R 10.10.10.13
+ssh-keyscan -t rsa 10.10.10.13 | sed -e 's/#.*$//' | sed -e '/^$/d' >> ~/.ssh/known_hosts  # Adding vsd to known_hosts
+echo "$(date) finishing installation of util server"
+ansible-playbook -i hosts util-deploy.yml
+
 echo "$(date) Listo! ahora juegue!" 

@@ -1,11 +1,9 @@
 ---
-
 - hosts: 
-#    - nserver
-#    - vsd
-#    - nsg
+    - nserver
+    - vsd
     - util
-#    - client
+    - stat
   remote_user: root
   gather_facts: no
   roles:

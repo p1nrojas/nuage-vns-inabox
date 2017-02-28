@@ -1,0 +1,28 @@
+- name: "Install Nuage util thru install.sh"
+  command: ./rpms/install.sh -x {{ vsd_fqdn }} -u {{ inventory_hostname }}
+  remote_user: root
+
+- name: "Copying certificates from VSD to util server"
+  shell:  "/opt/vsd/ejbca/deploy/certMgmt.sh -a generate -u proxy -c proxy -o csp -d {{ inventory_hostname }} -f pem -t server -s root@{{ ansible_host }}:/opt/SDVPNHAProxy/config/keys/"
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+
+- name: "Change VSD ejmode to allow"
+  command: "/opt/vsd/bin/ejmode allow"
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+ 
+- name: "Check services ejmode at VSD"
+  command: "/opt/vsd/ejbca/bin/ejbca.sh ra listendentities -S 00"
+  register: ejmode_status
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+
+- name: "Wait 5 minutes"
+  pause:
+    minutes: 5
+
+- name: "showing output of VSD ejmode"
+  debug:
+    msg: "{{ ejmode_status.stdout }}"
+

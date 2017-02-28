@@ -74,6 +74,25 @@
             netmask: 255.255.255.0 }
           ]      
          }
+      - { hostname: stat.sdn40r7.lab,
+          description: "Stat server based on ElasticSearch" ,
+          inventory: stat ,
+          Is_NM_enabled: true ,
+          No_cloud_init: true ,
+          Guestfish: true ,
+          memory: 4194304 ,
+          vcpu_num: 2 ,
+          image_qcow2: /tmp/stat40r7.qcow2 ,
+          hypervisor: 192.168.1.113,
+          ansible_host: 10.10.10.14 ,
+          gateway: 10.10.10.1,
+          interfaces: [
+          { name: eth0 ,
+            bridge: datacenter,
+            ip: 10.10.10.14 ,
+            netmask: 255.255.255.0 }
+          ]      
+         }
       - { hostname: head1.sdn40r7.lab,
           description: "NSG-v Head End at Datacenter" ,
           inventory: nsg ,
@@ -178,6 +197,8 @@
           xmpp_username: vsc01,
           gateway: 10.10.10.1,
           interfaces: [
+          { name: bof ,
+            bridge: datacenter },
           { name: control ,
             bridge: datacenter,
             ip: 10.10.10.11 ,
@@ -198,6 +219,8 @@
           xmpp_username: vsc02,
           gateway: 10.10.10.1,
           interfaces: [
+          { name: bof ,
+            bridge: datacenter },
           { name: control ,
             bridge: datacenter,
             ip: 10.10.10.12 ,

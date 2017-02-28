@@ -1,0 +1,17 @@
+
+- name: "Executing commands at util to haproxy and supervidord"
+  command: "{{ item }}"
+  with_items: 
+    - chkconfig haproxy on
+    - chkconfig supervisord on
+    - service haproxy restart
+    - service supervisord restart 
+
+- name: "Check service at util server"
+  shell: "ps -ef | grep supervisord"
+  register: util_status
+
+- name: "showing output of util"
+  debug:
+    msg: "{{ util_status.stdout }}" 
+

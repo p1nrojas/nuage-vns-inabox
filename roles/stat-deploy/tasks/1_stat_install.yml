@@ -1,0 +1,6 @@
+- name: Start elasticsearch on {{ inventory_hostname }}
+  service:
+    name: elasticsearch
+    state: started
+  remote_user: root
+

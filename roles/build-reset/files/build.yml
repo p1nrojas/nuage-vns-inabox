@@ -59,6 +59,8 @@
           description: "Util server for Nuage VNS" ,
           inventory: util ,
           Is_NM_enabled: true ,
+          No_cloud_init: true ,
+          Guestfish: true ,
           memory: 2097152 ,
           vcpu_num: 2 ,
           image_qcow2: /tmp/util40r7.qcow2 ,
@@ -69,6 +71,25 @@
           { name: eth0 ,
             bridge: datacenter,
             ip: 10.10.10.13 ,
+            netmask: 255.255.255.0 }
+          ]      
+         }
+      - { hostname: stat.sdn40r7.lab,
+          description: "Stat server based on ElasticSearch" ,
+          inventory: util ,
+          Is_NM_enabled: true ,
+          No_cloud_init: true ,
+          Guestfish: true ,
+          memory: 4194304 ,
+          vcpu_num: 2 ,
+          image_qcow2: /tmp/stat40r7.qcow2 ,
+          hypervisor: 192.168.1.113,
+          ansible_host: 10.10.10.14 ,
+          gateway: 10.10.10.1,
+          interfaces: [
+          { name: eth0 ,
+            bridge: datacenter,
+            ip: 10.10.10.14 ,
             netmask: 255.255.255.0 }
           ]      
          }
@@ -106,7 +127,7 @@
             bridge: datacenter}
           ]      
          }
-      - { hostname: nsg01.sdn40r7.lab,
+      - { hostname: nsg1.sdn40r7.lab,
           description: "NSG-v at Branch 1" ,
           inventory: nsg ,
           No_cloud_init: true ,
@@ -123,7 +144,7 @@
             bridge: branch1}
           ]      
          }
-      - { hostname: nsg02.sdn40r7.lab,
+      - { hostname: nsg2.sdn40r7.lab,
           description: "NSG-v at Branch 2" ,
           inventory: nsg ,
           No_cloud_init: true ,
@@ -140,6 +161,30 @@
             bridge: branch2}
           ]      
          }
+      - { hostname: cli1.sdn40r7.lab,
+          description: "client at branch1" ,
+          inventory: client ,
+          memory: 2097152 ,
+          vcpu_num: 2 ,
+          image_qcow2: /tmp/centos7.qcow2 ,
+          hypervisor: 192.168.1.113,
+          interfaces: [
+          { name: eth0 ,
+            bridge: branch1 }
+          ]
+         }
+      - { hostname: cli2.sdn40r7.lab,
+          description: "client at branch2" ,
+          inventory: client ,
+          memory: 2097152 ,
+          vcpu_num: 2 ,
+          image_qcow2: /tmp/centos7.qcow2 ,
+          hypervisor: 192.168.1.113,
+          interfaces: [
+          { name: eth0 ,
+            bridge: branch2 }
+          ]
+         }
     vsc_controllers:
       - { hostname: vsc1.sdn40r7.lab,
           description: "Nuage VSC - SDN controller" ,
@@ -152,14 +197,15 @@
           xmpp_username: vsc01,
           gateway: 10.10.10.1,
           interfaces: [
+          { name: bof ,
+            bridge: datacenter },
           { name: control ,
             bridge: datacenter,
             ip: 10.10.10.11 ,
             prefix: 24 }
           ],
           static_routes: [
-            "0.0.0.0/1 next-hop 10.10.10.1" ,
-            "128.0.0.0/1 next-hop 10.10.10.1" 
+            "0.0.0.0/0 next-hop 10.10.10.1" 
           ]
          }
       - { hostname: vsc2.sdn40r7.lab,
@@ -173,14 +219,15 @@
           xmpp_username: vsc02,
           gateway: 10.10.10.1,
           interfaces: [
+          { name: bof ,
+            bridge: datacenter },
           { name: control ,
             bridge: datacenter,
             ip: 10.10.10.12 ,
             prefix: 24 }
           ] ,      
           static_routes: [
-            "0.0.0.0/1 next-hop 10.10.10.1" ,
-            "128.0.0.0/1 next-hop 10.10.10.1" 
+            "0.0.0.0/0 next-hop 10.10.10.1" 
           ]
          }
     ssh_key:

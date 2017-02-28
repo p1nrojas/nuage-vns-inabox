@@ -16,18 +16,20 @@
           - 10.10.10.0/24
       - name: acl2
         match_list:
-          - 10.20.10.0/24
+          - 10.250.250.0/24
+          - 80.80.80.0/24
     bind_listen_ipv4:
       - any
     bind_allow_query:
       - 10.10.10.0/24
-      - 10.20.10.0/24
+      - 10.250.250.0/24
+      - 80.80.80.0/24
       - 127.0.0.0/8
     bind_recursion: true
     bind_forwarders:
       - 8.8.8.8
       - 4.4.4.4
-    bind_zone_name: sdn40r61.lab
+    bind_zone_name: sdn40r7.lab
     bind_zone_networks:
       - '10.10.10'
     bind_zone_master_server_ip: 10.10.10.2
@@ -41,27 +43,21 @@
           - dns
       - name: '@'
         ip: 10.10.10.2
-      - name: master
-        ip: 10.10.10.101
-      - name: minion01
-        ip: 10.10.10.102
-      - name: minion02
-        ip: 10.10.10.103
       - name: vsd1
         ip: 10.10.10.10
       - name: vsc1
         ip: 10.10.10.11
-      - name: vsc1-control
-        ip: 10.10.20.11
       - name: vsc2
         ip: 10.10.10.12
-      - name: vsc2-control
-        ip: 10.10.20.12
+      - name: util
+        ip: 10.10.10.13
+      - name: stat
+        ip: 10.10.10.14
     bind_zone_services:
       - name: _xmpp-client._tcp
         weight: 10
         port: 5222
-        target: vsd1.sdn40r61.lab
+        target: vsd1.sdn40r7.lab
 # ntp vars
     ntp_restrict_net: 10.0.0.0
     ntp_restrict_mask: 255.0.0.0
@@ -72,10 +68,32 @@
           netmask: 255.255.255.0 ,
           range_min: 10.10.10.150 ,
           range_max: 10.10.10.250 ,
-          domain_name: sdn40r61.lab,
+          domain_name: sdn40r7.lab,
           domain_name_server: 10.10.10.2 ,
           router: 10.10.10.1 ,
           broadcast_address: 10.10.10.255 ,
+          default_lease_time: 600000 ,
+          max_lease_time: 7200000
+        }
+      - { subnet: 10.250.250.0 ,
+          netmask: 255.255.255.0 ,
+          range_min: 10.250.250.150 ,
+          range_max: 10.250.250.250 ,
+          domain_name: sdn40r7.lab,
+          domain_name_server: 10.10.10.2 ,
+          router: 10.250.250.1 ,
+          broadcast_address: 10.250.250.255 ,
+          default_lease_time: 600000 ,
+          max_lease_time: 7200000
+        }
+      - { subnet: 80.80.80.0 ,
+          netmask: 255.255.255.0 ,
+          range_min: 80.80.80.150 ,
+          range_max: 80.80.80.250 ,
+          domain_name: sdn40r7.lab,
+          domain_name_server: 10.10.10.2 ,
+          router: 80.80.80.1 ,
+          broadcast_address: 80.80.80.255 ,
           default_lease_time: 600000 ,
           max_lease_time: 7200000
         }

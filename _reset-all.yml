@@ -3,6 +3,7 @@
     - vsd
     - nserver
     - vsc
+    - stat
     - nsg
     - util
     - client

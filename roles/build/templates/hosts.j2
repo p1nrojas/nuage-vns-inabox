@@ -41,6 +41,15 @@
 {% endif %}
 
 {% if servers is defined %}
+[stat]
+{% for server in servers %}
+{% if server.inventory == "stat" %}
+{{ server.hostname }} ansible_host={{ server.ansible_host }} ansible_user=root
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if servers is defined %}
 [nsg]
 {% for server in servers %}
 {% if server.inventory == "nsg" %}

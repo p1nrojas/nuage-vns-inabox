@@ -1,0 +1,19 @@
+---
+
+# Prepare util server
+- include: 0_util_setup.yml
+
+# Installing and configuring util server
+- include: 1_util_install.yml
+
+# Checking services at util server
+- include: 2_util_services_check.yml
+
+# Creating proxy user at VSD
+- include: 3_create_proxy_user.yml
+
+# Creating VSC certs for TLS profile
+- include: 4_vsc_certs_create.yml
+
+# Creating VSC profiles
+- include: 5_vsc_create_profiles.yml

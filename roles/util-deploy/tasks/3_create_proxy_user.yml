@@ -1,0 +1,12 @@
+
+- name: "Create user proxy"
+  local_action: command python {{playbook_dir}}/roles/util-deploy/files/nuage_create_user.py {{ vsd_user }} {{ vsd_passwd }} {{ vsd_org }} {{ vsd_host }} {{ proxy_user }} {{ proxy_passwd }} {{ proxy_email }}
+  register: output
+
+- name: Verification Result Failure Status
+  fail: msg={{ output.stdout }}
+  when: output.stdout != "success"
+
+- name: Verification Result Success Status
+  debug: var=output.stdout
+

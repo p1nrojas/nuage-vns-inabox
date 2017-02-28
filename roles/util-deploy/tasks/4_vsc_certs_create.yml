@@ -1,0 +1,38 @@
+- name: install pip in VSD
+  yum: name={{ item }} state=present
+  with_items:
+   - python-pip
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+
+- name: install pexpect at VSD
+  pip:
+    name: pexpect
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+
+- name: "Add VSC1 to VSD known_hosts list"
+  shell: "ssh-keyscan -t rsa {{ vsc1_host }} | sed -e 's/#.*$//' | sed -e '/^$/d' > /root/.ssh/known_hosts"
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+
+- name: "copying certificates to VSC1"
+  expect:
+    command: "/opt/vsd/ejbca/deploy/certMgmt.sh -a generate -u {{ vsc1_cert_name }} -c {{ vsc1_cert_name }} -d {{ vsc1_fqdn }}  -f pem -t server -o csp -s admin@{{ vsc1_host }}:/"
+    responses:
+      (?i)password: "{{ vsc1_passwd }}"
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+
+- name: "Add VSC2 to VSD known_hosts list"
+  shell: "ssh-keyscan -t rsa {{ vsc2_host }} | sed -e 's/#.*$//' | sed -e '/^$/d' > /root/.ssh/known_hosts"
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+
+- name: "copying certificates to VSC2"
+  expect:
+    command: "/opt/vsd/ejbca/deploy/certMgmt.sh -a generate -u {{ vsc2_cert_name }} -c {{ vsc2_cert_name }} -d {{ vsc2_fqdn }}  -f pem -t server -o csp -s admin@{{ vsc2_host }}:/"
+    responses:
+      (?i)password: "{{ vsc1_passwd }}"
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root

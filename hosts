@@ -17,6 +17,9 @@ vsc2.sdn40r7.lab ansible_host=10.10.10.12
 [util]
 util.sdn40r7.lab ansible_host=10.10.10.13 ansible_user=root
 
+[stat]
+stat.sdn40r7.lab ansible_host=10.10.10.14 ansible_user=root
+
 [nsg]
 head1.sdn40r7.lab
 head2.sdn40r7.lab

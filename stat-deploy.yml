@@ -1,0 +1,9 @@
+---
+- hosts: stat
+  remote_user: root
+  gather_facts: no
+  vars:
+    vsd_fqdn: vsd1.sdn40r7.lab
+    vsd_host: 10.10.10.10
+  roles:
+    - stat-deploy

@@ -9,6 +9,8 @@ image_qcow2: /tmp/vsc40r7.qcow2
 hypervisor: 192.168.1.113
 gateway: 10.10.10.1
 interfaces:
+  - { name: bof ,
+      bridge: datacenter }
   - { name: control ,
       bridge: datacenter ,
       ip: 10.10.10.11 ,

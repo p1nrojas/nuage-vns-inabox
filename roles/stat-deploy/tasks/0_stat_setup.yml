@@ -1,0 +1,121 @@
+---
+
+- name: Delete the localtime file on {{ inventory_hostname }}
+  file:
+    path: /etc/localtime
+    state: absent
+  remote_user: root
+
+- name: Create the localtime symlink on {{ inventory_hostname }}
+  file:
+    src: /usr/share/zoneinfo/US/Central
+    dest: /etc/localtime
+    state: link
+  remote_user: root
+
+- name: "Remove firewall services"
+  command: "{{ item }}"
+  with_items:
+    - "systemctl stop firewalld"
+    - "systemctl disable firewalld"
+  ignore_errors: yes 
+
+- name: Remove old hostname servers on {{ inventory_hostname }}
+  lineinfile:
+    dest: /etc/hosts
+    regexp: "^{{ interfaces[0].ip }}"
+    state: absent
+  remote_user: root
+
+- name: Add hostname to hosts table {{ inventory_hostname }}
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{ interfaces[0].ip }}  {{ inventory_hostname }}"
+  remote_user: root
+
+- name: Remove old NTP servers on {{ inventory_hostname }}
+  lineinfile:
+    dest: /etc/ntp.conf
+    regexp: "^server"
+    state: absent
+  remote_user: root
+
+- name: Configure NTP servers on {{ inventory_hostname }}
+  lineinfile:
+    dest: /etc/ntp.conf
+    line: "server {{ item }}"
+  with_items: "{{ ntp_server }}"
+  remote_user: root
+
+- name: Stop the ntpd service if running
+  service:
+    name: ntpd
+    state: stopped
+  remote_user: root
+
+- name: Manually sync time with ntp server
+  command: ntpdate -u "{{ntp_server[0]}}"
+  remote_user: root
+
+- name: Start ntpd on {{ inventory_hostname }}
+  service:
+    name: ntpd
+    state: started
+  remote_user: root
+
+- name: check ntp sync state
+  shell: ntpstat | awk 'NR==1{print $1}'
+  register: sync_status
+  until: sync_status.stdout == "synchronised"
+  retries: 6
+  delay: 10
+  remote_user: root
+  ignore_errors: yes
+
+- name: Stop the ntpd service if running
+  service:
+    name: ntpd
+    state: stopped
+  remote_user: root
+
+- name: Manually sync time with ntp server
+  command: ntpdate -u "{{ntp_server[0]}}"
+  remote_user: root
+
+- name: Start ntpd on {{ inventory_hostname }}
+  service:
+    name: ntpd
+    state: started
+  remote_user: root
+
+- name: check ntp sync state
+  shell: ntpstat | awk 'NR==1{print $1}'
+  register: sync_status
+  until: sync_status.stdout == "synchronised"
+  retries: 6
+  delay: 10
+  remote_user: root
+
+- name: "Create ssh key at VSD"
+  shell: ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N ""
+  args:
+    creates: /root/.ssh/id_rsa
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+
+- name: "Fetch ssh public from VSD"
+  fetch: src=/root/.ssh/id_rsa.pub dest=/tmp
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+
+- name: add VSD key to authorized keys file
+  authorized_key:
+    user: root
+    state: present
+    key: "{{ lookup('file', '/tmp/{{ inventory_hostname }}/root/.ssh/id_rsa.pub') }}"
+
+- name: "Add stat to VSD known_hosts list"
+  shell: "ssh-keyscan -t rsa {{ ansible_host }} | sed -e 's/#.*$//' | sed -e '/^$/d' > /root/.ssh/known_hosts"
+  delegate_to: "{{ vsd_host }}"
+  remote_user: root
+

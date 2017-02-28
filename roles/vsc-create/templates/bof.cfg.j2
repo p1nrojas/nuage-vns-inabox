@@ -8,7 +8,9 @@ primary-image         cf1:\timos\cpm.tim
 primary-config        cf1:\config.cfg
 {% for interface in interfaces %}
 {% if interface.name == "bof" %}
+{% if interface.ip is defined %}
 address               {{ interface.ip }}/{{ interface.prefix }} active
+{% endif %}
 {% endif %}
 {% endfor %}
 primary-dns           {{ dns.servers[0] }}
