@@ -75,7 +75,22 @@ ssh-keyscan -t rsa {{ interface.ip }} | sed -e 's/#.*$//' | sed -e '/^$/d' >> ~/
 {% endfor %}
 {% endif %}
 {% endfor %}
-echo "$(date) finishing installation of util server"
+echo "$(date) configuring  util server"
 ansible-playbook -i hosts util-deploy.yml
+
+# Installing stat server
+{% for server in servers %}
+{% if server.inventory == "stat" %}
+{% for interface in server.interfaces %}
+{% if interface.name == "eth0" %}
+ssh-keygen -R {{ interface.ip }}
+ssh-keyscan -t rsa {{ interface.ip }} | sed -e 's/#.*$//' | sed -e '/^$/d' >> ~/.ssh/known_hosts  # Adding vsd to known_hosts
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+echo "$(date) configuring stat server"
+ansible-playbook -i hosts stat-deploy.yml
+
 
 echo "$(date) Listo! ahora juegue!" 

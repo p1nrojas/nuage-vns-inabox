@@ -1,8 +1,8 @@
 ##Caution! Use it under your own risk. Intended for PoCs and Labs
 
-#Create a Nuage VCS in a KVM Box
+#Createyour SD-WAN in a box (Nuage VNS)
 
-Hello there. Bored to create and recreate many times a dns/ntp/dhcp and Nuage VSP ( SDN controller ) servers for my demos. I've created this playbook
+Hello there. Bored to create and recreate many times my lab for SD-WAN using Nuage VNS ( SDN controller ) servers for my demos. I've created this playbook
 It would create a libvirt VMs and set bind, ntp and dhcp up in one of the servers. And Nuage VSD ( management ) and a couple of VCSs (control).
 
 ## Quick Start
