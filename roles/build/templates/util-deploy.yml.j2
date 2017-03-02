@@ -1,0 +1,24 @@
+# This file is made by build role
+---
+- hosts: util
+  remote_user: root
+  gather_facts: no
+  vars:
+{% for server in servers %}
+{% if server.inventory == 'vsd' %}
+    vsd_fqdn: {{ server.hostname }}
+    vsd_host: {{ server.interfaces[0].ip }}
+{% endif %}
+{% endfor %}
+{% for vsc in vsc_controllers %}
+{% if 'vsc1' in vsc.hostname %}
+    vsc1_fqdn: {{ vsc.hostname }}
+    vsc1_host: {{ vsc.interfaces[1].ip }}
+{% endif %}
+{% if 'vsc2' in vsc.hostname %}
+    vsc2_fqdn: {{ vsc.hostname }}
+    vsc2_host: {{ vsc.interfaces[1].ip }}
+{% endif %}
+{% endfor %}
+  roles:
+    - util-deploy

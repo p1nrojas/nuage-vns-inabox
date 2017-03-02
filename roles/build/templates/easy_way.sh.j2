@@ -62,7 +62,7 @@ ssh-keyscan -t rsa {{ interface.ip }} | sed -e 's/#.*$//' | sed -e '/^$/d' >> ~/
 {% endif %}
 {% endfor %}
 echo "$(date) finishing installation of VSD"
-ansible-playbook -i hosts nuage-deploy.yml 
+ansible-playbook -i hosts vsd-deploy.yml 
 
 # Installing util server
 {% for server in servers %}

@@ -13,3 +13,15 @@
 
 - name: Create group_vars/all file
   template: src=group_vars.all.j2 dest="{{ playbook_dir }}/group_vars/all" backup=no
+
+- name: Create util-deploy.yml file
+  template: src=util-deploy.yml.j2 dest="{{ playbook_dir }}/util-deploy.yml" backup=no
+
+- name: Create nserver-deploy.yml file
+  template: src=nserver-deploy.yml.j2 dest="{{ playbook_dir }}/nserver-deploy.yml" backup=no
+
+- name: Create stat-deploy.yml file
+  template: src=stat-deploy.yml.j2 dest="{{ playbook_dir }}/stat-deploy.yml" backup=no
+
+- name: Create vsd-deploy.yml file
+  template: src=vsd-deploy.yml.j2 dest="{{ playbook_dir }}/vsd-deploy.yml" backup=no

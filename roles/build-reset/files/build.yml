@@ -76,7 +76,7 @@
          }
       - { hostname: stat.sdn40r7.lab,
           description: "Stat server based on ElasticSearch" ,
-          inventory: util ,
+          inventory: stat ,
           Is_NM_enabled: true ,
           No_cloud_init: true ,
           Guestfish: true ,

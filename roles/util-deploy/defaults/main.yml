@@ -1,0 +1,12 @@
+# Deafult vars to config util server and profiles
+
+vsc1_cert_name: vsc1nsg
+vsc1_passwd: admin
+vsc2_cert_name: vsc2nsg
+vsc2_passwd: admin
+vsd_user: csproot
+vsd_passwd: csproot
+vsd_org: csp
+proxy_user: proxy
+proxy_passwd: proxy
+proxy_email: proxy@sdn40r7.lab

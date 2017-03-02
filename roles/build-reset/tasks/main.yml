@@ -23,3 +23,11 @@
 
 - name: Destroy hosts file in the playbook directory
   file: path={{ playbook_dir }}/hosts state=absent
+
+- name: Destroy yml files in the playbook directory
+  file: path={{ playbook_dir }}/{{ item }} state=absent
+  with_items:
+    - vsd-deploy.yml
+    - stat-deploy.yml
+    - nserver-deploy.yml
+    - util-deploy.yml

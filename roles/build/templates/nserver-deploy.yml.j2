@@ -1,0 +1,168 @@
+# Create dns and ntp server for PoCs and demos
+# Created by build role thru ansible
+---
+- hosts: nserver
+  gather_facts: no
+  remote_user: centos
+  become: true
+  become_method: sudo
+  vars:
+# Ansible vars for DNS service 
+{% for server in servers %}
+{% if server.inventory == 'nserver' %}
+    ansible_hostname: {{ server.interfaces[0].ip }}
+{% endif %}
+{% endfor %}
+    named_group: named
+    named_owner: named
+    bind_acls:
+      - name: acl1
+        match_list:
+{% for server in servers %}
+{% if server.inventory == 'nserver' %}
+          - {{ server.interfaces[0].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.0/24
+{% endif %}
+{% endfor %}
+      - name: acl2
+        match_list:
+{% for server in servers %}
+{% if server.inventory == 'nserver' %}
+          - {{ server.interfaces[1].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.0/24
+          - {{ server.interfaces[2].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.0/24
+{% endif %}
+{% endfor %}
+    bind_listen_ipv4:
+      - any
+    bind_allow_query:
+{% for server in servers %}
+{% if server.inventory == 'nserver' %}
+      - {{ server.interfaces[0].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.0/24
+      - {{ server.interfaces[1].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.0/24
+      - {{ server.interfaces[2].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.0/24
+{% endif %}
+{% endfor %}
+      - 127.0.0.0/8
+    bind_recursion: true
+    bind_forwarders:
+      - 8.8.8.8
+      - 4.4.4.4
+    bind_zone_name: sdn40r7.lab
+    bind_zone_networks:
+{% for server in servers %}
+{% if server.inventory == 'nserver' %}
+      - '{{ server.interfaces[0].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}'
+{% endif %}
+{% endfor %}
+{% for server in servers %}
+{% if server.inventory == 'nserver' %}
+    bind_zone_master_server_ip: {{ server.interfaces[0].ip }}
+{% endif %}
+{% endfor %}
+    bind_zone_name_servers:
+      - ns1
+    bind_zone_hosts:
+      - name: ns1
+{% for server in servers %}
+{% if server.inventory == 'nserver' %}
+        ip: {{ server.interfaces[0].ip }}
+{% endif %}
+{% endfor %}
+        aliases:
+          - ntp
+          - dns
+      - name: '@'
+{% for server in servers %}
+{% if server.inventory == 'nserver' %}
+        ip: {{ server.interfaces[0].ip }}
+{% endif %}
+{% endfor %}
+{% for server in servers %}
+{% if server.inventory == 'vsd' %}
+      - name: vsd1
+        ip: {{ server.interfaces[0].ip }}
+{% endif %}
+{% endfor %}
+{% for vsc in vsc_controllers %}
+{% if 'vsc1' in vsc.hostname  %}
+      - name: vsc1
+        ip: {{ vsc.interfaces[1].ip }}
+{% endif %}
+{% if 'vsc2' in vsc.hostname  %}
+      - name: vsc2
+        ip: {{ vsc.interfaces[1].ip }}
+{% endif %}
+{% endfor %}
+{% for server in servers %}
+{% if server.inventory == 'util' %}
+      - name: util
+        ip: {{ server.interfaces[0].ip }}
+{% endif %}
+{% endfor %}
+{% for server in servers %}
+{% if server.inventory == 'stat' %}
+      - name: stat
+        ip: {{ server.interfaces[0].ip }}
+{% endif %}
+{% endfor %}
+    bind_zone_services:
+      - name: _xmpp-client._tcp
+        weight: 10
+        port: 5222
+{% for server in servers %}
+{% if server.inventory == 'vsd' %}
+        target: {{ server.hostname }}
+{% endif %}
+{% endfor %}
+# ntp vars
+{% for server in servers %}
+{% if server.inventory == 'nserver' %}
+    ntp_restrict_net: {{ server.interfaces[0].ip | regex_replace('^([0-9]*)\.[0-9]*\.[0-9]*\.[0-9]*$', '\\1') }}.0.0.0
+{% endif %}
+{% endfor %}
+    ntp_restrict_mask: 255.0.0.0
+
+# dhcp settings
+    dhcp_subnets:
+{% for server in servers %}
+{% if server.inventory == 'nserver' %}
+      - { subnet: {{ server.interfaces[0].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.0 ,
+          netmask: 255.255.255.0 ,
+          range_min: {{ server.interfaces[0].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.150 ,
+          range_max: {{ server.interfaces[0].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.250 ,
+          domain_name: {{ dns_domain }},
+          domain_name_server: {{ server.interfaces[0].ip }} ,
+          router: {{ server.interfaces[0].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.1 ,
+          broadcast_address: {{ server.interfaces[0].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.255 ,
+          default_lease_time: 600000 ,
+          max_lease_time: 7200000
+        }
+      - { subnet: {{ server.interfaces[1].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.0 ,
+          netmask: 255.255.255.0 ,
+          range_min: {{ server.interfaces[1].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.150 ,
+          range_max: {{ server.interfaces[1].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.250 ,
+          domain_name: {{ dns_domain }},
+          domain_name_server: {{ server.interfaces[0].ip }} ,
+          router: {{ server.interfaces[1].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.1 ,
+          broadcast_address: {{ server.interfaces[1].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.255 ,
+          default_lease_time: 600000 ,
+          max_lease_time: 7200000
+        }
+      - { subnet: {{ server.interfaces[2].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.0 ,
+          netmask: 255.255.255.0 ,
+          range_min: {{ server.interfaces[2].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.150 ,
+          range_max: {{ server.interfaces[2].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.250 ,
+          domain_name: {{ dns_domain }},
+          domain_name_server: {{ server.interfaces[0].ip }} ,
+          router: {{ server.interfaces[2].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.1 ,
+          broadcast_address: {{ server.interfaces[2].ip | regex_replace('^([0-9]*\.[0-9]*\.[0-9]*)\.[0-9]*$', '\\1') }}.255 ,
+          default_lease_time: 600000 ,
+          max_lease_time: 7200000
+        }
+{% endif %}
+{% endfor %}
+
+# defined roles       
+  roles:
+    - bind-install
+    - ntp-install
+    - dhcp-install
