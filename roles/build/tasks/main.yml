@@ -25,3 +25,6 @@
 
 - name: Create vsd-deploy.yml file
   template: src=vsd-deploy.yml.j2 dest="{{ playbook_dir }}/vsd-deploy.yml" backup=no
+
+- name: Create nuage-install.yml file
+  template: src=nuage-install.yml.j2 dest="{{ playbook_dir }}/nuage-install.yml" backup=no

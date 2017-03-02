@@ -27,6 +27,7 @@
 - name: Destroy yml files in the playbook directory
   file: path={{ playbook_dir }}/{{ item }} state=absent
   with_items:
+    - nuage-install.yml
     - vsd-deploy.yml
     - stat-deploy.yml
     - nserver-deploy.yml
