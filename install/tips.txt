@@ -1,0 +1,8 @@
+#To create the image
+docker build -t nuage-vns-inabox .
+
+#To create the container
+docker run -d -i -t --name vcs01 -v ~/docker/.ssh:/home/dev/.ssh -v ~/docker/var/log:/var/log/ansible -v ~/docker/code/nuage-vns-inabox:/home/dev/nuage-vns-inabox -v ~/docker/var/tmp:/tmp nuage-vns-inabox  /bin/bash
+
+#To access the container
+docker exec -i -t vcs01 /bin/bash
