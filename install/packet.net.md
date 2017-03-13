@@ -1,6 +1,9 @@
 # Prepare your brand new bare metal server in packet.net
 
 ```
+yum -y install docker
+service docker start
+yum -y install git
 mkdir ~/docker
 cd ~/docker
 mkdir -p ./var/log
